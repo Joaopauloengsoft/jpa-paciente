@@ -1,27 +1,52 @@
 package org;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Persistence;
+import org.dao.PacienteDAO;
 import org.model.Paciente;
-import org.w3c.dom.Entity;
+import org.utils.HibernateUtil;
 
 import java.time.LocalDate;
 
 public class Main {
     public static void main(String[] args) {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("unit-jpa");
-        EntityManager em = emf.createEntityManager();
-        em.getTransaction().begin();
-        Paciente p1 = new Paciente();
-        LocalDate data = LocalDate.of(1990, 12, 25);
 
-        p1.setCpf("111.222.333-44");
-        p1.setNome("João Paulo");
-        p1.setDataNascimento(data);
-        p1.setTelefone("999138752");
-        em.persist(p1);
-        em.getTransaction().commit();
-        em.close();
+        PacienteDAO dao = new PacienteDAO();
+
+        Paciente paciente = new Paciente();
+        /*
+        System.out.println("------[ Create Paciente ] -------");
+        paciente.setNome("DANIEL C. SILVA");
+        paciente.setCpf("999.888.777-66");
+        LocalDate data = LocalDate.of(1990, 12, 25);
+        paciente.setDataNascimento(data);
+        paciente.setTelefone("(62) 99999-8888");
+        dao.salarPaciente(paciente);
+
+         */
+
+        System.out.println("");
+        System.out.println("------[ Buscar por nome do Paciente ] -------");
+        Paciente pacienteAux = dao.buscarPacientePorNome("DANIEL C. SILVA");
+        System.out.println(pacienteAux);
+
+        System.out.println("");
+        System.out.println("------[ Update Paciente ] -------");
+        if (pacienteAux != null) {
+            paciente.setCpf("17317");
+            LocalDate data1 = LocalDate.of(1990, 12, 25);
+            paciente.setDataNascimento(data1);
+            paciente.setNome("Miguel C. SILVA");
+            System.out.printf("Professor atualizado: " + dao.buscarPacientePorNome(""));
+        }
+
+        System.out.println("");
+        System.out.println("------[ Listar todos Pacientes ] -------");
+        dao.buscarPaciente().forEach(System.out::println);
+
+        System.out.println("");
+        System.out.println("------[ Deletar Professor ] -------");
+        if (dao.buscarPacientePorNome("DANIEL C. SILVA") != null) {
+            dao.excluirPaciente("DANIEL C. SILVA");
+        }
+        HibernateUtil.shutdown();
     }
 }
