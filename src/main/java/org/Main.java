@@ -1,52 +1,47 @@
 package org;
 
-import org.dao.PacienteDAO;
-import org.model.Paciente;
-import org.utils.HibernateUtil;
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+import org.utils.HibernateUtil; // Importante para fechar a conexão ao sair
 
-import java.time.LocalDate;
+import java.io.IOException;
 
-public class Main {
+public class Main extends Application {
+
+    @Override
+    public void start(Stage stage) {
+        try {
+            // CARREGANDO O FXML
+            // Certifique-se de que o nome do arquivo aqui é EXATAMENTE o nome do seu arquivo .fxml
+            // e que ele está na pasta 'resources'
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/interface_paciente.fxml")); // <--- CONFIRA O NOME AQUI
+
+            Parent root = loader.load();
+            Scene scene = new Scene(root);
+
+            stage.setTitle("Gerenciamento de Clínica");
+            stage.setScene(scene);
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("ERRO CRÍTICO: Não foi possível carregar o arquivo FXML.");
+            System.out.println("Verifique se o arquivo está na pasta 'resources' e se o nome está correto.");
+        }
+    }
+
+    // Este método é chamado automaticamente quando você fecha a janela do programa
+    @Override
+    public void stop() throws Exception {
+        super.stop();
+        System.out.println("Encerrando conexão com o banco de dados...");
+        HibernateUtil.shutdown(); // Fecha o Hibernate corretamente
+    }
+
     public static void main(String[] args) {
-
-        PacienteDAO dao = new PacienteDAO();
-
-        Paciente paciente = new Paciente();
-        /*
-        System.out.println("------[ Create Paciente ] -------");
-        paciente.setNome("DANIEL C. SILVA");
-        paciente.setCpf("999.888.777-66");
-        LocalDate data = LocalDate.of(1990, 12, 25);
-        paciente.setDataNascimento(data);
-        paciente.setTelefone("(62) 99999-8888");
-        dao.salarPaciente(paciente);
-
-         */
-
-        System.out.println("");
-        System.out.println("------[ Buscar por nome do Paciente ] -------");
-        Paciente pacienteAux = dao.buscarPacientePorNome("DANIEL C. SILVA");
-        System.out.println(pacienteAux);
-
-        System.out.println("");
-        System.out.println("------[ Update Paciente ] -------");
-        if (pacienteAux != null) {
-            paciente.setCpf("17317");
-            LocalDate data1 = LocalDate.of(1990, 12, 25);
-            paciente.setDataNascimento(data1);
-            paciente.setNome("Miguel C. SILVA");
-            System.out.printf("Professor atualizado: " + dao.buscarPacientePorNome(""));
-        }
-
-        System.out.println("");
-        System.out.println("------[ Listar todos Pacientes ] -------");
-        dao.buscarPaciente().forEach(System.out::println);
-
-        System.out.println("");
-        System.out.println("------[ Deletar Professor ] -------");
-        if (dao.buscarPacientePorNome("DANIEL C. SILVA") != null) {
-            dao.excluirPaciente("DANIEL C. SILVA");
-        }
-        HibernateUtil.shutdown();
+        launch(args); // Esse comando que inicia o JavaFX
     }
 }

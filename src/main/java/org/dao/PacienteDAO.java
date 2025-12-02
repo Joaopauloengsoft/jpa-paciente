@@ -1,9 +1,8 @@
 package org.dao;
-import org.hibernate.query.Query; // Importante importar
 
-import jakarta.transaction.SystemException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 import org.model.Paciente;
 import org.utils.HibernateUtil;
 
@@ -11,11 +10,10 @@ import java.util.List;
 
 public class PacienteDAO {
 
-
-    public void salarPaciente(Paciente paciente) {
+    // 1. Adiciona um paciente (No Banco de Dados via Hibernate)
+    public void salvarPaciente(Paciente paciente) {
         Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            //Inicia Transação
             transaction = session.beginTransaction();
             session.persist(paciente);
             transaction.commit();
@@ -27,46 +25,46 @@ public class PacienteDAO {
         }
     }
 
-
-
-    public Paciente buscarPacientePorNome(String nome) {
+    // 2. Retorna uma lista de todos os pacientes
+    public List<Paciente> listarPacientes() {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-
-            // Criamos uma consulta HQL: "Traga o Paciente p onde p.nome é igual ao parâmetro"
-            String hql = "FROM Paciente p WHERE p.nome = :nomeBusca";
-
-            Query<Paciente> query = session.createQuery(hql, Paciente.class);
-            query.setParameter("nomeBusca", nome);
-
-            // uniqueResult() retorna o objeto se achar, ou null se não achar.
-            // Se houver mais de um "Daniel", ele lança erro (o que é bom para integridade)
-            return query.uniqueResult();
-
+            // HQL para trazer todos os registros
+            return session.createQuery("FROM Paciente", Paciente.class).list();
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    public List<Paciente> buscarPaciente(){
+    // 3. Retorna uma lista de pacientes cujo nome contenha o termo (Busca parcial)
+    public List<Paciente> buscarPacientePorNome(String nome) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            session.beginTransaction();
-            return session.createQuery("from Paciente",Paciente.class).list();
-        }
-        catch (Exception e) {
+            // HQL usando LIKE para verificar se "contém" o termo
+            // O lower() ajuda a ignorar maiúsculas e minúsculas
+            String hql = "FROM Paciente p WHERE lower(p.nome) LIKE lower(:nomeBusca)";
+
+            Query<Paciente> query = session.createQuery(hql, Paciente.class);
+            // Os % são curingas do SQL para dizer "qualquer coisa antes ou depois"
+            query.setParameter("nomeBusca", "%" + nome + "%");
+
+            return query.list();
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 
+    // 4. Atualiza as informações de um paciente existente
     public void atualizarPaciente(Paciente paciente) {
         Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
+
+            // O merge verifica se o ID existe e atualiza os dados
             session.merge(paciente);
+
             transaction.commit();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             if (transaction != null) {
                 transaction.rollback();
             }
@@ -74,18 +72,24 @@ public class PacienteDAO {
         }
     }
 
-    public void excluirPaciente(String nome) {
+    // 5. Remove um paciente com base no ID
+    public void excluirPaciente(int id) {
         Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-            Paciente paciente =session.find(Paciente.class, nome);
 
-            if(paciente!=null){
+            // Primeiro buscamos o objeto pelo ID (Primary Key)
+            Paciente paciente = session.find(Paciente.class, id);
+
+            if (paciente != null) {
                 session.remove(paciente);
+                System.out.println("Paciente excluído com sucesso.");
+            } else {
+                System.out.println("Paciente com ID " + id + " não encontrado.");
             }
+
             transaction.commit();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             if (transaction != null) {
                 transaction.rollback();
             }
