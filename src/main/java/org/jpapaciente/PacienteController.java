@@ -57,7 +57,6 @@ public class PacienteController {
         });
     }
 
-    // --- Ações dos Botões (Nomes devem bater com onAction do FXML) ---
 
     @FXML
     public void onCadastrar(ActionEvent event) {
