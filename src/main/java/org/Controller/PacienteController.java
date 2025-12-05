@@ -1,4 +1,4 @@
-package org.jpapaciente;
+package org.Controller;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

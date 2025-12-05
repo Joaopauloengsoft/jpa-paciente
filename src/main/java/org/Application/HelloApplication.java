@@ -1,4 +1,4 @@
-package org.jpapaciente;
+package org.Application;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
